@@ -11,7 +11,7 @@ import RealmSwift
 
 class Category: Object {
     
-    @objc var name: String = ""
+    @objc dynamic var name: String = ""
     
-    let items = List<Item>() 
+    let items = List<Item>() //List is an array element of Realm, Item is a model class from Data Model directory
 }

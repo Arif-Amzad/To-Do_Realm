@@ -13,13 +13,11 @@ class CategoryViewController: UITableViewController {
     
     let realm = try! Realm()
     
-    var categoryArray = [Category]()
+    var categoryArray: Results<Category>?  //Results work as auto updating container. no need to add anything like array.append(data). it will automatically update these things
     
     let cellID = "CategoryCell"
     
     var indexNumber = Int()
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,19 +28,19 @@ class CategoryViewController: UITableViewController {
     }
 
     
+    
     //MARK: - TableView Datasource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return categoryArray.count
+        return categoryArray?.count ?? 1 // nil coalising operator
+        //meaning of categoryArray?.count =>> if category array is not nill then do this
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
         
-        let cat = categoryArray[indexPath.row]
-        
-        cell.textLabel?.text = cat.name
+        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No categories added yet"
         
         return cell
     }
@@ -66,15 +64,15 @@ class CategoryViewController: UITableViewController {
         //let indexPath = tableView.indexPathForSelectedRow
         //it will identify which row is selected automatically
     
-        destination.selectedCategory = categoryArray[indexNumber]
-        
-        
+        destination.selectedCategory = categoryArray?[indexNumber]
     }
     
     
     
     //MARK: - Data Manipulation Methods
     func loadFromStorage() {
+        
+        categoryArray = realm.objects(Category.self)   // what this line is doing is same  to same what the next commented code doing
         
 //        let request: NSFetchRequest<Category> = Category.fetchRequest()
 //
@@ -116,8 +114,6 @@ class CategoryViewController: UITableViewController {
                 let newCategory = Category()
                 
                 newCategory.name = textField.text!
-                
-                self.categoryArray.append(newCategory)
                 
                 self.saveFiles(category: newCategory)
             }
