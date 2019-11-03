@@ -16,6 +16,7 @@
 		DD9D34FB232A99A200DFDCD6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DD9D34F9232A99A200DFDCD6 /* Main.storyboard */; };
 		DD9D34FD232A99A200DFDCD6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DD9D34FC232A99A200DFDCD6 /* Assets.xcassets */; };
 		DD9D3500232A99A200DFDCD6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DD9D34FE232A99A200DFDCD6 /* LaunchScreen.storyboard */; };
+		DDFE0E47236EB3A0000DB5C5 /* SwipeTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFE0E46236EB3A0000DB5C5 /* SwipeTableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		DD9D34FC232A99A200DFDCD6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DD9D34FF232A99A200DFDCD6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		DD9D3501232A99A200DFDCD6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DDFE0E46236EB3A0000DB5C5 /* SwipeTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +78,7 @@
 			children = (
 				DD9D34F7232A99A200DFDCD6 /* ToDoListViewController.swift */,
 				DD6002CA2369FB5400DD7A2B /* CategoryViewController.swift */,
+				DDFE0E46236EB3A0000DB5C5 /* SwipeTableViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -248,6 +251,7 @@
 				DD9D34F8232A99A200DFDCD6 /* ToDoListViewController.swift in Sources */,
 				DD3D27A6236CC49000E6B63C /* Item.swift in Sources */,
 				DD9D34F6232A99A200DFDCD6 /* AppDelegate.swift in Sources */,
+				DDFE0E47236EB3A0000DB5C5 /* SwipeTableViewController.swift in Sources */,
 				DD3D27A8236CC49D00E6B63C /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

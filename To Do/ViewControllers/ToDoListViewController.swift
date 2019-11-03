@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
 class ToDoListViewController: UITableViewController {
     
@@ -30,6 +31,8 @@ class ToDoListViewController: UITableViewController {
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
         navigationItem.title = selectedCategory?.name
+        
+        tableView.rowHeight = 80.0
     }
     
     
@@ -42,7 +45,9 @@ class ToDoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! SwipeTableViewCell
+        
+        cell.delegate = self
         
         if let item = itemArray?[indexPath.row] {
             
@@ -125,6 +130,8 @@ class ToDoListViewController: UITableViewController {
                             
                             newItem.title = textField.text!
                             
+                            newItem.dateCreated = Date()
+                            
                             currentCategory.items.append(newItem)
                         }
                     }catch{
@@ -162,7 +169,9 @@ extension ToDoListViewController: UISearchBarDelegate {
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
 
-        itemArray = itemArray?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
+        itemArray = itemArray?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        
+        tableView.reloadData()
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -176,6 +185,46 @@ extension ToDoListViewController: UISearchBarDelegate {
                 searchBar.resignFirstResponder()
             }
         }
+    }
+}
+
+
+//MARK: - Swipe Cell Delegate Methods
+extension ToDoListViewController: SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        
+        guard orientation == .right else { return nil}
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { (action, indexPath) in
+            
+            if let categoryForDeletion = self.itemArray?[indexPath.row] {
+                
+                do{
+                    try self.realm.write {
+                        self.realm.delete(categoryForDeletion)
+                    }
+                }catch{
+                    print("Error deleteing the category \(error)")
+                }
+            }
+        }
+        
+        deleteAction.image = UIImage(named: "icondelete")
+        
+        return [deleteAction]
+    }
+    
+    
+    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        
+        var option = SwipeTableOptions()
+        
+        option.expansionStyle = .destructive
+        
+        option.transitionStyle = .border
+        
+        return option
     }
 }
 
