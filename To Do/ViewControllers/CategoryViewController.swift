@@ -8,9 +8,9 @@
 
 import UIKit
 import RealmSwift
-import SwipeCellKit
+import ChameleonFramework
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     
@@ -25,9 +25,9 @@ class CategoryViewController: UITableViewController {
         
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        tableView.rowHeight = 80.0
-        
         loadFromStorage()
+        
+        view.backgroundColor = UIColor(hexString: "684F83")
     }
 
     
@@ -41,11 +41,17 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! SwipeTableViewCell
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No categories added yet"
+
         
-        //cell.delegate = self
+        if let color =  UIColor(hexString: categoryArray?[indexPath.row].color ?? "684F83"){
+            
+            cell.backgroundColor = color
+            
+            cell.textLabel?.textColor = UIColor.init(contrastingBlackOrWhiteColorOn: color, isFlat: true)
+        }
         
         return cell
     }
@@ -95,6 +101,23 @@ class CategoryViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
+    //MARK:- Delete data from swipe
+    override func updateMdel(at indexPath: IndexPath) {
+        
+        super.updateMdel(at: indexPath) // this will  call updatemodel function of SwipeTableController
+        
+        if let categoryForDeletion = self.categoryArray?[indexPath.row] {
+            
+            do{
+                try self.realm.write {
+                    self.realm.delete(categoryForDeletion)
+                }
+            }catch{
+                print("Error when deleting categories \(error)")
+            }
+        }
+    }
+    
     
     
     //MARK: - Add New Item
@@ -111,6 +134,8 @@ class CategoryViewController: UITableViewController {
                 let newCategory = Category()
                 
                 newCategory.name = textField.text!
+                
+                newCategory.color = UIColor.randomFlat().hexValue()
                 
                 self.saveFiles(category: newCategory)
             }
@@ -132,48 +157,5 @@ class CategoryViewController: UITableViewController {
         alert.addAction(add)
         
         present(alert, animated: true, completion: nil)
-    }
-}
-
-
-//MARK: - Swipe Cell Delegate Methods
-extension CategoryViewController: SwipeTableViewCellDelegate {
-    
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        
-        guard orientation == .right else { return nil}
-        
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { (action, indexPath) in
-            
-            print("jgiofgoingonfogn")
-            
-            if let categoryForDeletion = self.categoryArray?[indexPath.row] {
-                
-                do{
-                    try self.realm.write {
-                        self.realm.delete(categoryForDeletion)
-                        print("deleted")
-                    }
-                }catch{
-                    print("Error deleteing the category \(error)")
-                }
-            }
-        }
-        
-        deleteAction.image = UIImage(named: "icondelete")
-        
-        return [deleteAction]
-    }
-    
-    
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        
-        var option = SwipeTableOptions()
-        
-        option.expansionStyle = .destructive
-        
-        option.transitionStyle = .border
-        
-        return option
     }
 }

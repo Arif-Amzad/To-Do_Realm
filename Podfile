@@ -9,4 +9,6 @@ target 'To Do' do
 pod 'RealmSwift'
 pod 'SwipeCellKit'
 
+pod 'ChameleonFramework'
+
 end

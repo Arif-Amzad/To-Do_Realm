@@ -9,8 +9,11 @@
 import UIKit
 import RealmSwift
 import SwipeCellKit
+import ChameleonFramework
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeTableViewController {
+    
+    @IBOutlet weak var itemSearchOutlet: UISearchBar!
     
     let realm = try! Realm()
     
@@ -32,7 +35,28 @@ class ToDoListViewController: UITableViewController {
         
         navigationItem.title = selectedCategory?.name
         
-        tableView.rowHeight = 80.0
+        view.backgroundColor = UIColor(hexString: selectedCategory?.color)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        guard let colorHex = selectedCategory?.color else{fatalError()}
+            
+        guard let navbar = navigationController?.navigationBar else{fatalError("Navigation controller does not exist")}
+            
+            //navbar.largeTitleTextAttributes! [NSAttributedString: UIColor.init(contrastingBlackOrWhiteColorOn: UIColor(hexString: colorHex), isFlat: true)]
+            
+        guard let navBarColor = UIColor(hexString: colorHex) else{fatalError()}
+            
+            //let navBarColor = UIColor.flatWhite()
+                
+        navbar.barTintColor = navBarColor
+                
+        navbar.tintColor = UIColor.init(contrastingBlackOrWhiteColorOn: navBarColor, isFlat: true)
+                
+        navbar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.init(contrastingBlackOrWhiteColorOn: navBarColor, isFlat: true)!]
+                
+        itemSearchOutlet.barTintColor = navBarColor
     }
     
     
@@ -45,15 +69,20 @@ class ToDoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! SwipeTableViewCell
-        
-        cell.delegate = self
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = itemArray?[indexPath.row] {
             
             cell.textLabel?.text = item.title
             
             cell.accessoryType = item.done ? .checkmark : .none
+            
+            if let color = UIColor(hexString: selectedCategory?.color).darken(byPercentage: CGFloat(indexPath.row) / CGFloat(itemArray!.count)) {
+                
+                cell.backgroundColor = color
+                
+                cell.textLabel?.textColor = UIColor.init(contrastingBlackOrWhiteColorOn: color, isFlat: true)
+            }
         }
         else{
             
@@ -110,7 +139,26 @@ class ToDoListViewController: UITableViewController {
     
     
     
-    //MARK - Add New Items
+    //MARK: - Delete data from swipe
+    override func updateMdel(at indexPath: IndexPath) {
+        
+        super.updateMdel(at: indexPath)
+        
+        if let itemForDeletion = self.itemArray?[indexPath.row] {
+            
+            do{
+                try self.realm.write {
+                    self.realm.delete(itemForDeletion)
+                }
+            }catch{
+                print("Error when deleting items \(error)")
+            }
+        }
+    }
+    
+    
+    
+    //MARK: - Add New Items
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()
@@ -135,7 +183,6 @@ class ToDoListViewController: UITableViewController {
                             currentCategory.items.append(newItem)
                         }
                     }catch{
-                        
                         print("Error saving new items \(error)")
                     }
                 }
@@ -152,6 +199,7 @@ class ToDoListViewController: UITableViewController {
         
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
+            
             textField = alertTextField
         }
         
@@ -187,48 +235,6 @@ extension ToDoListViewController: UISearchBarDelegate {
         }
     }
 }
-
-
-//MARK: - Swipe Cell Delegate Methods
-extension ToDoListViewController: SwipeTableViewCellDelegate {
-    
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        
-        guard orientation == .right else { return nil}
-        
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { (action, indexPath) in
-            
-            if let categoryForDeletion = self.itemArray?[indexPath.row] {
-                
-                do{
-                    try self.realm.write {
-                        self.realm.delete(categoryForDeletion)
-                    }
-                }catch{
-                    print("Error deleteing the category \(error)")
-                }
-            }
-        }
-        
-        deleteAction.image = UIImage(named: "icondelete")
-        
-        return [deleteAction]
-    }
-    
-    
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        
-        var option = SwipeTableOptions()
-        
-        option.expansionStyle = .destructive
-        
-        option.transitionStyle = .border
-        
-        return option
-    }
-}
-
-
 
 
 
